@@ -1,9 +1,13 @@
 library material_search;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
 typedef bool MaterialSearchFilter<T>(T v, String c);
 typedef int MaterialSearchSort<T>(T v, String c);
+typedef Future<List<MaterialSearchResult>> MaterialResultsFinder(String c);
 
 class MaterialSearchResult<T> extends StatelessWidget {
   const MaterialSearchResult({
@@ -31,25 +35,36 @@ class MaterialSearch<T> extends StatefulWidget {
     Key key,
     this.placeholder,
     this.results,
+    this.getResults,
     this.filter,
     this.sort,
     this.onSelect,
-    this.loading: false,
-  }) : super(key: key);
+  }) : assert(() {
+         if (results == null && getResults == null
+             || results != null && getResults != null) {
+           throw new AssertionError('Either provide a function to get the results, or the results.');
+         }
+
+         return true;
+       }()),
+       super(key: key);
 
   final String placeholder;
 
   final List<MaterialSearchResult<T>> results;
+  final MaterialResultsFinder getResults;
   final MaterialSearchFilter<T> filter;
   final MaterialSearchSort<T> sort;
   final ValueChanged<T> onSelect;
-  final bool loading;
 
   @override
   _MaterialSearchState<T> createState() => new _MaterialSearchState<T>();
 }
 
 class _MaterialSearchState<T> extends State<MaterialSearch> {
+  bool _loading = false;
+  List<MaterialSearchResult<T>> _results = [];
+
   String _criteria = '';
   TextEditingController _controller = new TextEditingController();
 
@@ -61,16 +76,62 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.getResults != null) {
+      _getResultsDebounced();
+    }
+
     _controller.addListener(() {
       setState(() {
         _criteria = _controller.value.text;
+        _getResultsDebounced();
+      });
+    });
+  }
+
+  Timer _resultsTimer;
+  Future _getResultsDebounced() async {
+    if (_results.length == 0) {
+      setState(() {
+        _loading = true;
+      });
+    }
+
+    if (_resultsTimer != null && _resultsTimer.isActive) {
+      _resultsTimer.cancel();
+    }
+
+    _resultsTimer = new Timer(new Duration(milliseconds: 400), () async {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _loading = true;
+      });
+
+      var results = await widget.getResults(_criteria);
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _loading = false;
+        _results = results;
       });
     });
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _resultsTimer.cancel();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var results = widget.results
+    var results = (widget.results ?? _results)
       .where((MaterialSearchResult result) {
         return widget.filter != null
           ? widget.filter(result.value, _criteria)
@@ -117,7 +178,7 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
             ],
           ),
         ),
-        widget.loading
+        _loading
             ? new Padding(
                 padding: const EdgeInsets.only(top: 50.0),
                 child: new CircularProgressIndicator()
@@ -140,42 +201,73 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
   }
 }
 
-class MaterialSearchInput<T> extends StatelessWidget {
+class _MaterialSearchPageRoute<T> extends MaterialPageRoute<T> {
+  _MaterialSearchPageRoute({
+    @required WidgetBuilder builder,
+    RouteSettings settings: const RouteSettings(),
+    maintainState: true,
+    bool fullscreenDialog: false,
+  }) : assert(builder != null),
+       super(builder: builder, settings: settings, maintainState: maintainState, fullscreenDialog: fullscreenDialog);
+}
+
+class MaterialSearchInput<T> extends StatefulWidget {
   const MaterialSearchInput({
     Key key,
     this.placeholder,
     this.results,
+    this.getResults,
     this.filter,
     this.sort,
     this.onSelect,
     this.valueText,
-    this.loading: false,
   }) : super(key: key);
 
   final String placeholder;
 
   final List<MaterialSearchResult<T>> results;
+  final MaterialResultsFinder getResults;
   final MaterialSearchFilter<T> filter;
   final MaterialSearchSort<T> sort;
   final ValueChanged<T> onSelect;
-  final bool loading;
 
   final String valueText;
 
-  _showMaterialSearch(BuildContext context) {
-    Navigator.of(context).push(new MaterialPageRoute<T>(
-      builder: (BuildContext context) => new Material(
-        child: new MaterialSearch(
-          placeholder: placeholder,
-          results: results,
-          filter: filter,
-          sort: sort,
-          loading: loading,
-          onSelect: (T value) => Navigator.of(context).pop(value),
+  @override
+  _MaterialSearchInputState<T> createState() => new _MaterialSearchInputState<T>();
+}
+
+class _MaterialSearchInputState<T> extends State<MaterialSearchInput> {
+  _MaterialSearchPageRoute _materialPageRoute;
+
+  _materialSearchBuilder(BuildContext context) {
+    return new Material(
+      child: new MaterialSearch<T>(
+        placeholder: widget.placeholder,
+        results: widget.results,
+        getResults: widget.getResults,
+        filter: widget.filter,
+        sort: widget.sort,
+        onSelect: (T value) => Navigator.of(context).pop(value),
+      ),
+    );
+  }
+
+  _buildMaterialSearchPage(BuildContext context) {
+    return _materialPageRoute = new _MaterialSearchPageRoute<T>(
+        settings: new RouteSettings(
+          name: 'material_search',
+          isInitialRoute: false,
         ),
-      )
-    )).then((T value) {
-      onSelect(value);
+        builder: _materialSearchBuilder
+    );
+  }
+
+  _showMaterialSearch(BuildContext context) {
+    Navigator.of(context).push(_buildMaterialSearchPage(context)).then((T value) {
+      widget.onSelect(value);
+    }).whenComplete(() {
+      _materialPageRoute = null;
     });
   }
 
@@ -187,15 +279,15 @@ class MaterialSearchInput<T> extends StatelessWidget {
       onTap: () => _showMaterialSearch(context),
       child: new InputDecorator(
         decoration: new InputDecoration(
-          labelText: placeholder,
-          labelStyle: (valueText != null && valueText.length > 0) ? null : valueStyle,
+          labelText: widget.placeholder,
+          labelStyle: (widget.valueText != null && widget.valueText.length > 0) ? null : valueStyle,
         ),
         baseStyle: valueStyle,
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            new Text(valueText, style: valueStyle),
+            new Text(widget.valueText, style: valueStyle),
           ],
         ),
       ),
