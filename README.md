@@ -15,7 +15,7 @@ For help on editing package code, view the [documentation](https://flutter.io/de
 
 ### App
 
-Checkout the [Example app](/blob/master/example/lib/main.dart)
+Checkout the [Example app](/example/lib/main.dart)
 
 ### Raw Material Search
 
