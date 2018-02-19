@@ -34,10 +34,22 @@ void main() {
   runApp(new Scaffold(
     body: new MaterialSearch<String>(
       placeholder: 'Search', //placeholder of the search bar text input
+
+      getResults: (String criteria) async {
+        var list = await _fetchList(criteria);
+        return list.map((name) => new MaterialSearchResult<String>(
+          value: name, //The value must be of type <String>
+          text: name, //String that will be show in the list
+          icon: Icons.person,
+        )).toList();
+      },
+      //or
       results: _list.map((name) => new MaterialSearchResult<String>(
         value: name, //The value must be of type <String>
         text: name, //String that will be show in the list
+        icon: Icons.person,
       )).toList(),
+
       //optional. default filter will look like this:
       filter: (String value, String criteria) {
         return value.toString().toLowerCase().trim()
@@ -47,9 +59,7 @@ void main() {
       sort: (String value, String criteria) {
         return 0;
       },
-      //optional, defaults to false
-      loading: false,
-      //callback when some value is selected
+      //callback when some value is selected, optional.
       onSelect: (String selected) {
         print(selected);
       },
@@ -84,10 +94,22 @@ void main() {
       placeholder: 'Search',
       //text of the input, to indicate which value is selected
       valueText: _selected ?? '',
+
+      getResults: (String criteria) async {
+        var list = await _fetchList(criteria);
+        return list.map((name) => new MaterialSearchResult<String>(
+          value: name, //The value must be of type <String>
+          text: name, //String that will be show in the list
+          icon: Icons.person,
+        )).toList();
+      },
+      //or
       results: _list.map((name) => new MaterialSearchResult<String>(
         value: name, //The value must be of type <String>
         text: name, //String that will be show in the list
+        icon: Icons.person,
       )).toList(),
+
       //optional. default filter will look like this:
       filter: (String value, String criteria) {
         return value.toString().toLowerCase().trim()
@@ -97,8 +119,6 @@ void main() {
       sort: (String value, String criteria) {
         return 0;
       },
-      //optional, defaults to false
-      loading: false,
       //callback when some value is selected
       onSelect: (String selected) {
         if (selected == null) {
@@ -114,3 +134,7 @@ void main() {
   ));
 }
 ```
+
+## Notes
+
+`MaterialSearchInput` takes the same arguments as `MaterialSearch`, and a few more.
