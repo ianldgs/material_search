@@ -1,12 +1,11 @@
-library material_search;
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+typedef String FormFieldFormatter<T>(T v);
 typedef bool MaterialSearchFilter<T>(T v, String c);
-typedef int MaterialSearchSort<T>(T v, String c);
+typedef int MaterialSearchSort<T>(T a, T b, String c);
 typedef Future<List<MaterialSearchResult>> MaterialResultsFinder(String c);
 
 class MaterialSearchResult<T> extends StatelessWidget {
@@ -14,18 +13,23 @@ class MaterialSearchResult<T> extends StatelessWidget {
     Key key,
     this.value,
     this.text,
+    this.icon,
   }) : super(key: key);
 
   final T value;
   final String text;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     return new Container(
-      child: new Text(text, style: Theme.of(context).textTheme.subhead),
-      padding: new EdgeInsets.only(left: 48.0),
-      height: 52.0,
-      alignment: Alignment.centerLeft,
+      child: new Row(
+        children: <Widget>[
+          new Container(width: 70.0, child: new Icon(icon)),
+          new Expanded(child: new Text(text, style: Theme.of(context).textTheme.subhead)),
+        ],
+      ),
+      height: 56.0,
     );
   }
 }
@@ -38,6 +42,7 @@ class MaterialSearch<T> extends StatefulWidget {
     this.getResults,
     this.filter,
     this.sort,
+    this.limit: 10,
     this.onSelect,
   }) : assert(() {
          if (results == null && getResults == null
@@ -55,6 +60,7 @@ class MaterialSearch<T> extends StatefulWidget {
   final MaterialResultsFinder getResults;
   final MaterialSearchFilter<T> filter;
   final MaterialSearchSort<T> sort;
+  final int limit;
   final ValueChanged<T> onSelect;
 
   @override
@@ -84,7 +90,9 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
     _controller.addListener(() {
       setState(() {
         _criteria = _controller.value.text;
-        _getResultsDebounced();
+        if (widget.getResults != null) {
+          _getResultsDebounced();
+        }
       });
     });
   }
@@ -110,6 +118,7 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
         _loading = true;
       });
 
+      //TODO: debounce widget.results too
       var results = await widget.getResults(_criteria);
 
       if (!mounted) {
@@ -126,77 +135,74 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
   @override
   void dispose() {
     super.dispose();
-    _resultsTimer.cancel();
+    _resultsTimer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     var results = (widget.results ?? _results)
       .where((MaterialSearchResult result) {
-        return widget.filter != null
-          ? widget.filter(result.value, _criteria)
-          : _filter(result.value, _criteria);
+        if (widget.filter != null) {
+          return widget.filter(result.value, _criteria);
+        }
+        //only apply default filter if used the `results` option
+        //because getResults may already have applied some filter if `filter` option was omited.
+        else if (widget.results != null) {
+          return _filter(result.value, _criteria);
+        }
+
+        return true;
       })
       .toList();
 
     if (widget.sort != null) {
-      results.sort((a, b) => widget.sort(a.value, _criteria));
+      results.sort((a, b) => widget.sort(a.value, b.value, _criteria));
     }
 
     results = results
-      .take(5)
+      .take(widget.limit)
       .toList();
 
-    return new Column(
-      children: <Widget>[
-        new Container(
-          decoration: new BoxDecoration(
-            color: Colors.white,
-            boxShadow: kElevationToShadow[3]
-          ),
-          margin: const EdgeInsets.only(top: 24.0),
-          padding: const EdgeInsets.only(top: 5.0, bottom: 4.0),
-          child: new Row(
-            children: <Widget>[
-              new BackButton(),
-              new Expanded(child: new TextField(
-                controller: _controller,
-                autofocus: true,
-                decoration: new InputDecoration.collapsed(hintText: widget.placeholder),
-                style: Theme.of(context).textTheme.title,
-              )),
-              _criteria.length > 0
-                ? new IconButton(
-                    icon: new Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() {
-                        _controller.text = _criteria = '';
-                      });
-                    }
-                  )
-                : new Column(children: []),
-            ],
-          ),
+    IconThemeData iconTheme = Theme.of(context).iconTheme.copyWith(color: Colors.black);
+
+    return new Scaffold(
+      appBar: new AppBar(
+        backgroundColor: Colors.white,
+        iconTheme: iconTheme,
+        title: new TextField(
+          controller: _controller,
+          autofocus: true,
+          decoration: new InputDecoration.collapsed(hintText: widget.placeholder),
+          style: Theme.of(context).textTheme.title,
         ),
-        _loading
-            ? new Padding(
-                padding: const EdgeInsets.only(top: 50.0),
-                child: new CircularProgressIndicator()
-              )
-            : new Container(
-              margin: const EdgeInsets.only(top: 10.0),
-              child: new SingleChildScrollView(
-                child: new Column(
-                  children: results.map((MaterialSearchResult result) {
-                    return new InkWell(
-                      onTap: () => widget.onSelect(result.value),
-                      child: result,
-                    );
-                  }).toList(),
-                ),
-              ),
+        actions: _criteria.length == 0 ? [] : [
+          new IconButton(
+            icon: new Icon(Icons.clear),
+            onPressed: () {
+              setState(() {
+                _controller.text = _criteria = '';
+              });
+            }
+          ),
+        ],
+      ),
+      body: _loading
+        ? new Center(
+            child: new Padding(
+              padding: const EdgeInsets.only(top: 50.0),
+              child: new CircularProgressIndicator()
             ),
-      ],
+          )
+        : new SingleChildScrollView(
+            child: new Column(
+              children: results.map((MaterialSearchResult result) {
+                return new InkWell(
+                  onTap: () => widget.onSelect(result.value),
+                  child: result,
+                );
+              }).toList(),
+            ),
+          ),
     );
   }
 }
@@ -208,22 +214,37 @@ class _MaterialSearchPageRoute<T> extends MaterialPageRoute<T> {
     maintainState: true,
     bool fullscreenDialog: false,
   }) : assert(builder != null),
-       super(builder: builder, settings: settings, maintainState: maintainState, fullscreenDialog: fullscreenDialog);
+        super(builder: builder, settings: settings, maintainState: maintainState, fullscreenDialog: fullscreenDialog);
 }
 
-class MaterialSearchInput<T> extends StatefulWidget {
-  const MaterialSearchInput({
+class MaterialSearchInput<T> extends FormField<T> {
+  MaterialSearchInput({
     Key key,
+    FormFieldSetter<T> onSaved,
+    FormFieldValidator<T> validator,
+    bool autovalidate: true,
+
     this.placeholder,
+    this.formatter,
     this.results,
     this.getResults,
     this.filter,
     this.sort,
     this.onSelect,
-    this.valueText,
-  }) : super(key: key);
+  }) : super(
+    key: key,
+    onSaved: onSaved,
+    validator: validator,
+    autovalidate: autovalidate,
+    builder: (FormFieldState<T> field) {
+      final _MaterialSearchInputState<T> state = field;
+
+      return state._build(state.context);
+    },
+  );
 
   final String placeholder;
+  final FormFieldFormatter<T> formatter;
 
   final List<MaterialSearchResult<T>> results;
   final MaterialResultsFinder getResults;
@@ -231,64 +252,61 @@ class MaterialSearchInput<T> extends StatefulWidget {
   final MaterialSearchSort<T> sort;
   final ValueChanged<T> onSelect;
 
-  final String valueText;
-
   @override
   _MaterialSearchInputState<T> createState() => new _MaterialSearchInputState<T>();
 }
 
-class _MaterialSearchInputState<T> extends State<MaterialSearchInput> {
-  _MaterialSearchPageRoute _materialPageRoute;
-
-  _materialSearchBuilder(BuildContext context) {
-    return new Material(
-      child: new MaterialSearch<T>(
-        placeholder: widget.placeholder,
-        results: widget.results,
-        getResults: widget.getResults,
-        filter: widget.filter,
-        sort: widget.sort,
-        onSelect: (T value) => Navigator.of(context).pop(value),
-      ),
-    );
-  }
-
+class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> with FormFieldState<T> {
   _buildMaterialSearchPage(BuildContext context) {
-    return _materialPageRoute = new _MaterialSearchPageRoute<T>(
-        settings: new RouteSettings(
-          name: 'material_search',
-          isInitialRoute: false,
-        ),
-        builder: _materialSearchBuilder
+    return new _MaterialSearchPageRoute<T>(
+      settings: new RouteSettings(
+        name: 'material_search',
+        isInitialRoute: false,
+      ),
+      builder: (BuildContext context) {
+        return new Material(
+          child: new MaterialSearch<T>(
+            placeholder: widget.placeholder,
+            results: widget.results,
+            getResults: widget.getResults,
+            filter: widget.filter,
+            sort: widget.sort,
+            onSelect: (T value) => Navigator.of(context).pop(value),
+          ),
+        );
+      }
     );
   }
 
   _showMaterialSearch(BuildContext context) {
-    Navigator.of(context).push(_buildMaterialSearchPage(context)).then((T value) {
-      widget.onSelect(value);
-    }).whenComplete(() {
-      _materialPageRoute = null;
-    });
+    Navigator.of(context)
+      .push(_buildMaterialSearchPage(context))
+      .then((Object value) {
+        onChanged(value);
+        widget.onSelect(value);
+      });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  bool get _isEmpty {
+    return value == null;
+  }
+
+  Widget _build(BuildContext context) {
     final TextStyle valueStyle = Theme.of(context).textTheme.subhead;
 
     return new InkWell(
       onTap: () => _showMaterialSearch(context),
       child: new InputDecorator(
+        isEmpty: _isEmpty,
         decoration: new InputDecoration(
+          labelStyle: _isEmpty ? null : valueStyle,
           labelText: widget.placeholder,
-          labelStyle: (widget.valueText != null && widget.valueText.length > 0) ? null : valueStyle,
+          errorText: errorText,
         ),
         baseStyle: valueStyle,
-        child: new Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            new Text(widget.valueText, style: valueStyle),
-          ],
+        child: _isEmpty ? null : new Text(
+          widget.formatter != null ? widget.formatter(value) : value.toString(),
+          style: valueStyle
         ),
       ),
     );
