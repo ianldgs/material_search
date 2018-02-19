@@ -13,6 +13,10 @@ For help on editing package code, view the [documentation](https://flutter.io/de
 
 ## Example
 
+### App
+
+Checkout the [Example app](/blob/master/example/lib/main.dart)
+
 ### Raw Material Search
 
 ```dart
