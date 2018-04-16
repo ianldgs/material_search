@@ -1,3 +1,7 @@
+## [0.2.2] - 16/04/2018
+
+* type '(String, String) => bool' is not a subtype of type '(dynamic, String) => bool' [#11](https://github.com/ianldgs/material_search/issues/11)
+
 ## [0.2.1] - 19/02/2018
 
 * `pubspec.yaml` patches
