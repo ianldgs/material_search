@@ -74,7 +74,7 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
   String _criteria = '';
   TextEditingController _controller = new TextEditingController();
 
-  _filter(T v, String c) {
+  _filter(dynamic v, String c) {
     return v.toString().toLowerCase().trim()
       .contains(new RegExp(r'' + c.toLowerCase().trim() + ''));
   }
@@ -271,7 +271,7 @@ class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> with Fo
             getResults: widget.getResults,
             filter: widget.filter,
             sort: widget.sort,
-            onSelect: (T value) => Navigator.of(context).pop(value),
+            onSelect: (dynamic value) => Navigator.of(context).pop(value),
           ),
         );
       }
@@ -282,7 +282,7 @@ class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> with Fo
     Navigator.of(context)
       .push(_buildMaterialSearchPage(context))
       .then((Object value) {
-        onChanged(value);
+        didChange(value);
         widget.onSelect(value);
       });
   }

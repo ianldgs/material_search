@@ -56,11 +56,11 @@ class _MyHomePageState extends State<MyHomePage> {
               value: v,
               text: "Mr(s). $v",
             )).toList(),
-            filter: (String value, String criteria) {
+            filter: (dynamic value, String criteria) {
               return value.toLowerCase().trim()
                 .contains(new RegExp(r'' + criteria.toLowerCase().trim() + ''));
             },
-            onSelect: (String value) => Navigator.of(context).pop(value),
+            onSelect: (dynamic value) => Navigator.of(context).pop(value),
           ),
         );
       }
@@ -70,8 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
   _showMaterialSearch(BuildContext context) {
     Navigator.of(context)
       .push(_buildMaterialSearchPage(context))
-      .then((Object value) {
-        setState(() => _name = value);
+      .then((dynamic value) {
+        setState(() => _name = value as String);
       });
   }
 
@@ -96,18 +96,18 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             new Padding(
               padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-              child: new MaterialSearchInput(
+              child: new MaterialSearchInput<String>(
                 placeholder: 'Name',
                 results: _names.map((String v) => new MaterialSearchResult<String>(
                   icon: Icons.person,
                   value: v,
                   text: "Mr(s). $v",
                 )).toList(),
-                filter: (String value, String criteria) {
+                filter: (dynamic value, String criteria) {
                   return value.toLowerCase().trim()
                     .contains(new RegExp(r'' + criteria.toLowerCase().trim() + ''));
                 },
-                onSelect: (String value) {
+                onSelect: (dynamic value) {
                   print(value);
                 },
               ),
