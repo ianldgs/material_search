@@ -217,12 +217,12 @@ class _MaterialSearchPageRoute<T> extends MaterialPageRoute<T> {
         super(builder: builder, settings: settings, maintainState: maintainState, fullscreenDialog: fullscreenDialog);
 }
 
-class MaterialSearchInput<T> extends FormField<T> {
+class MaterialSearchInput<T> extends StatefulWidget {
   MaterialSearchInput({
     Key key,
-    FormFieldSetter<T> onSaved,
-    FormFieldValidator<T> validator,
-    bool autovalidate: true,
+    this.onSaved,
+    this.validator,
+    this.autovalidate: false,
 
     this.placeholder,
     this.formatter,
@@ -231,17 +231,11 @@ class MaterialSearchInput<T> extends FormField<T> {
     this.filter,
     this.sort,
     this.onSelect,
-  }) : super(
-    key: key,
-    onSaved: onSaved,
-    validator: validator,
-    autovalidate: autovalidate,
-    builder: (FormFieldState<T> field) {
-      final _MaterialSearchInputState<T> state = field;
+  });
 
-      return state._build(state.context);
-    },
-  );
+  final FormFieldSetter<T> onSaved;
+  final FormFieldValidator<T> validator;
+  final bool autovalidate;
 
   final String placeholder;
   final FormFieldFormatter<T> formatter;
@@ -256,7 +250,9 @@ class MaterialSearchInput<T> extends FormField<T> {
   _MaterialSearchInputState<T> createState() => new _MaterialSearchInputState<T>();
 }
 
-class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> with FormFieldState<T> {
+class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> {
+  GlobalKey<FormFieldState<T>> _formFieldKey = new GlobalKey<FormFieldState<T>>();
+
   _buildMaterialSearchPage(BuildContext context) {
     return new _MaterialSearchPageRoute<T>(
       settings: new RouteSettings(
@@ -281,33 +277,45 @@ class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> with Fo
   _showMaterialSearch(BuildContext context) {
     Navigator.of(context)
       .push(_buildMaterialSearchPage(context))
-      .then((Object value) {
-        didChange(value);
-        widget.onSelect(value);
+      .then((dynamic value) {
+        if (value != null) {
+          _formFieldKey.currentState.didChange(value);
+          widget.onSelect(value);
+        }
       });
   }
 
-  bool get _isEmpty {
-    return value == null;
+  bool _isEmpty(field) {
+    return field.value == null;
   }
 
-  Widget _build(BuildContext context) {
+  Widget build(BuildContext context) {
     final TextStyle valueStyle = Theme.of(context).textTheme.subhead;
 
     return new InkWell(
       onTap: () => _showMaterialSearch(context),
-      child: new InputDecorator(
-        isEmpty: _isEmpty,
-        decoration: new InputDecoration(
-          labelStyle: _isEmpty ? null : valueStyle,
-          labelText: widget.placeholder,
-          errorText: errorText,
-        ),
-        baseStyle: valueStyle,
-        child: _isEmpty ? null : new Text(
-          widget.formatter != null ? widget.formatter(value) : value.toString(),
-          style: valueStyle
-        ),
+      child: new FormField<T>(
+        key: _formFieldKey,
+        validator: widget.validator,
+        onSaved: widget.onSaved,
+        autovalidate: widget.autovalidate,
+        builder: (FormFieldState<T> field) {
+          return new InputDecorator(
+            baseStyle: valueStyle,
+            isEmpty: _isEmpty(field),
+            decoration: new InputDecoration(
+              labelStyle: _isEmpty(field) ? null : valueStyle,
+              labelText: widget.placeholder,
+              errorText: field.errorText,
+            ),
+            child: _isEmpty(field) ? null : new Text(
+              widget.formatter != null
+                ? widget.formatter(field.value)
+                : field.value.toString(),
+              style: valueStyle
+            ),
+          );
+        },
       ),
     );
   }

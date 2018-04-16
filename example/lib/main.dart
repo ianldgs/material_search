@@ -41,6 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String _name = 'No one';
 
+  final _formKey = new GlobalKey<FormState>();
+
   _buildMaterialSearchPage(BuildContext context) {
     return new MaterialPageRoute<String>(
       settings: new RouteSettings(
@@ -92,29 +94,44 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: new Center(
         child: new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             new Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-              child: new MaterialSearchInput<String>(
-                placeholder: 'Name',
-                results: _names.map((String v) => new MaterialSearchResult<String>(
-                  icon: Icons.person,
-                  value: v,
-                  text: "Mr(s). $v",
-                )).toList(),
-                filter: (dynamic value, String criteria) {
-                  return value.toLowerCase().trim()
-                    .contains(new RegExp(r'' + criteria.toLowerCase().trim() + ''));
-                },
-                onSelect: (dynamic value) {
-                  print(value);
-                },
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 50.0),
+              child: new Text("You found: ${_name ?? 'No one'}"),
             ),
             new Padding(
               padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-              child: new Text("You found: ${_name ?? 'No one'}"),
+              child: new Form(
+                key: _formKey,
+                child: new Column(
+                  children: <Widget>[
+                    new MaterialSearchInput<String>(
+                      placeholder: 'Name',
+                      results: _names.map((String v) => new MaterialSearchResult<String>(
+                        icon: Icons.person,
+                        value: v,
+                        text: "Mr(s). $v",
+                      )).toList(),
+                      filter: (dynamic value, String criteria) {
+                        return value.toLowerCase().trim()
+                          .contains(new RegExp(r'' + criteria.toLowerCase().trim() + ''));
+                      },
+                      onSelect: (dynamic v) {
+                        print(v);
+                      },
+                      validator: (dynamic value) => value == null ? 'Required field' : null,
+                      formatter: (dynamic v) => 'Hello, $v',
+                    ),
+                    new MaterialButton(
+                      child: new Text('Validate'),
+                      onPressed: () {
+                        _formKey.currentState.validate();
+                      }
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

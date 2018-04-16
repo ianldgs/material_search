@@ -76,4 +76,51 @@ void main() {
 
     return;
   });
+
+  testWidgets('MaterialSearchInput Validation', (WidgetTester tester) async {
+    final formKey = new GlobalKey<FormState>();
+
+    await tester.pumpWidget(
+      new StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return new MaterialApp(
+            home: new Material(
+              child: new Form(
+                key: formKey,
+                child: new Column(
+                  children: <Widget>[
+                    new MaterialSearchInput<String>(
+                      placeholder: 'Find something',
+                      validator: (dynamic value) => value == null ? 'Required field' : null,
+                      results: _names.map((String v) => new MaterialSearchResult<String>(
+                        icon: Icons.person,
+                        value: v,
+                        text: v,
+                      )).toList(),
+                    ),
+                    new MaterialButton(
+                      child: new Text('Validate'),
+                      onPressed: () {
+                        formKey.currentState.validate();
+                      }
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(find.text('Find something'), findsOneWidget);
+    expect(find.text('Required field'), findsNothing);
+
+    await tester.tap(find.byType(MaterialButton));
+    await tester.pump();
+
+    expect(find.text('Required field'), findsOneWidget);
+
+    return;
+  });
 }
