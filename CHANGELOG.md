@@ -1,3 +1,11 @@
+## [0.2.4] - 29/04/2018
+
+* Respect autovalidate attribute from `Form.of(context)`
+
+## [0.2.3] - 16/04/2018
+
+* Fix auto documentation because of bad validation code
+
 ## [0.2.2] - 16/04/2018
 
 * type '(String, String) => bool' is not a subtype of type '(dynamic, String) => bool' [#11](https://github.com/ianldgs/material_search/issues/11)
