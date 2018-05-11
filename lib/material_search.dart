@@ -178,8 +178,9 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
           decoration: new InputDecoration.collapsed(hintText: widget.placeholder),
           style: Theme.of(context).textTheme.title,
           onSubmitted: (String value) {
-            if(widget.onSubmit != null)
+            if (widget.onSubmit != null) {
               widget.onSubmit(value);
+            }
           },
         ),
         actions: _criteria.length == 0 ? [] : [
