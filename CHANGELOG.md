@@ -1,3 +1,8 @@
+## [0.2.5] - 11/05/2018
+
+* feat(MaterialSearch.onSubmit) [#17](https://github.com/ianldgs/material_search/issues/17)
+* refactor(MaterialSearch): make bg color and icon color optional [#18](https://github.com/ianldgs/material_search/issues/18)
+
 ## [0.2.4] - 29/04/2018
 
 * Respect autovalidate attribute from `Form.of(context)`
