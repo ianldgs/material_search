@@ -7,6 +7,7 @@ typedef String FormFieldFormatter<T>(T v);
 typedef bool MaterialSearchFilter<T>(T v, String c);
 typedef int MaterialSearchSort<T>(T a, T b, String c);
 typedef Future<List<MaterialSearchResult>> MaterialResultsFinder(String c);
+typedef void OnSubmit(String value);
 
 class MaterialSearchResult<T> extends StatelessWidget {
   const MaterialSearchResult({
@@ -44,6 +45,7 @@ class MaterialSearch<T> extends StatefulWidget {
     this.sort,
     this.limit: 10,
     this.onSelect,
+    this.onSubmit,
   }) : assert(() {
          if (results == null && getResults == null
              || results != null && getResults != null) {
@@ -62,6 +64,7 @@ class MaterialSearch<T> extends StatefulWidget {
   final MaterialSearchSort<T> sort;
   final int limit;
   final ValueChanged<T> onSelect;
+  final OnSubmit onSubmit;
 
   @override
   _MaterialSearchState<T> createState() => new _MaterialSearchState<T>();
@@ -174,6 +177,11 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
           autofocus: true,
           decoration: new InputDecoration.collapsed(hintText: widget.placeholder),
           style: Theme.of(context).textTheme.title,
+          onSubmitted: (String value) {
+            if (widget.onSubmit != null) {
+              widget.onSubmit(value);
+            }
+          },
         ),
         actions: _criteria.length == 0 ? [] : [
           new IconButton(

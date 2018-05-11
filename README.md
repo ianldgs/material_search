@@ -67,6 +67,10 @@ void main() {
       onSelect: (String selected) {
         print(selected);
       },
+      //callback when the value is submitted, optional.
+      onSubmit: (String value) {
+        print(value);
+      },
     ),
   ));
 }

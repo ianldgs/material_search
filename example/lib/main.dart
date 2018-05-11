@@ -63,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 .contains(new RegExp(r'' + criteria.toLowerCase().trim() + ''));
             },
             onSelect: (dynamic value) => Navigator.of(context).pop(value),
+            onSubmit: (String value) => Navigator.of(context).pop(value),
           ),
         );
       }
