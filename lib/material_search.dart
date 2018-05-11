@@ -44,17 +44,21 @@ class MaterialSearch<T> extends StatefulWidget {
     this.sort,
     this.limit: 10,
     this.onSelect,
+    this.barBackgroundColor = Colors.white,
+    this.iconColor = Colors.black,
   }) : assert(() {
-         if (results == null && getResults == null
-             || results != null && getResults != null) {
-           throw new AssertionError('Either provide a function to get the results, or the results.');
-         }
+    if (results == null && getResults == null
+        || results != null && getResults != null) {
+      throw new AssertionError('Either provide a function to get the results, or the results.');
+    }
 
-         return true;
-       }()),
-       super(key: key);
+    return true;
+  }()),
+        super(key: key);
 
   final String placeholder;
+  final Color barBackgroundColor;
+  final Color iconColor;
 
   final List<MaterialSearchResult<T>> results;
   final MaterialResultsFinder getResults;
@@ -76,7 +80,7 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
 
   _filter(dynamic v, String c) {
     return v.toString().toLowerCase().trim()
-      .contains(new RegExp(r'' + c.toLowerCase().trim() + ''));
+        .contains(new RegExp(r'' + c.toLowerCase().trim() + ''));
   }
 
   @override
@@ -141,33 +145,33 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
   @override
   Widget build(BuildContext context) {
     var results = (widget.results ?? _results)
-      .where((MaterialSearchResult result) {
-        if (widget.filter != null) {
-          return widget.filter(result.value, _criteria);
-        }
-        //only apply default filter if used the `results` option
-        //because getResults may already have applied some filter if `filter` option was omited.
-        else if (widget.results != null) {
-          return _filter(result.value, _criteria);
-        }
+        .where((MaterialSearchResult result) {
+      if (widget.filter != null) {
+        return widget.filter(result.value, _criteria);
+      }
+      //only apply default filter if used the `results` option
+      //because getResults may already have applied some filter if `filter` option was omited.
+      else if (widget.results != null) {
+        return _filter(result.value, _criteria);
+      }
 
-        return true;
-      })
-      .toList();
+      return true;
+    })
+        .toList();
 
     if (widget.sort != null) {
       results.sort((a, b) => widget.sort(a.value, b.value, _criteria));
     }
 
     results = results
-      .take(widget.limit)
-      .toList();
+        .take(widget.limit)
+        .toList();
 
-    IconThemeData iconTheme = Theme.of(context).iconTheme.copyWith(color: Colors.black);
+    IconThemeData iconTheme = Theme.of(context).iconTheme.copyWith(color: widget.iconColor);
 
     return new Scaffold(
       appBar: new AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: widget.barBackgroundColor,
         iconTheme: iconTheme,
         title: new TextField(
           controller: _controller,
@@ -177,32 +181,32 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
         ),
         actions: _criteria.length == 0 ? [] : [
           new IconButton(
-            icon: new Icon(Icons.clear),
-            onPressed: () {
-              setState(() {
-                _controller.text = _criteria = '';
-              });
-            }
+              icon: new Icon(Icons.clear),
+              onPressed: () {
+                setState(() {
+                  _controller.text = _criteria = '';
+                });
+              }
           ),
         ],
       ),
       body: _loading
-        ? new Center(
-            child: new Padding(
-              padding: const EdgeInsets.only(top: 50.0),
-              child: new CircularProgressIndicator()
-            ),
-          )
-        : new SingleChildScrollView(
-            child: new Column(
-              children: results.map((MaterialSearchResult result) {
-                return new InkWell(
-                  onTap: () => widget.onSelect(result.value),
-                  child: result,
-                );
-              }).toList(),
-            ),
-          ),
+          ? new Center(
+        child: new Padding(
+            padding: const EdgeInsets.only(top: 50.0),
+            child: new CircularProgressIndicator()
+        ),
+      )
+          : new SingleChildScrollView(
+        child: new Column(
+          children: results.map((MaterialSearchResult result) {
+            return new InkWell(
+              onTap: () => widget.onSelect(result.value),
+              child: result,
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }
@@ -253,34 +257,34 @@ class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> {
 
   _buildMaterialSearchPage(BuildContext context) {
     return new _MaterialSearchPageRoute<T>(
-      settings: new RouteSettings(
-        name: 'material_search',
-        isInitialRoute: false,
-      ),
-      builder: (BuildContext context) {
-        return new Material(
-          child: new MaterialSearch<T>(
-            placeholder: widget.placeholder,
-            results: widget.results,
-            getResults: widget.getResults,
-            filter: widget.filter,
-            sort: widget.sort,
-            onSelect: (dynamic value) => Navigator.of(context).pop(value),
-          ),
-        );
-      }
+        settings: new RouteSettings(
+          name: 'material_search',
+          isInitialRoute: false,
+        ),
+        builder: (BuildContext context) {
+          return new Material(
+            child: new MaterialSearch<T>(
+              placeholder: widget.placeholder,
+              results: widget.results,
+              getResults: widget.getResults,
+              filter: widget.filter,
+              sort: widget.sort,
+              onSelect: (dynamic value) => Navigator.of(context).pop(value),
+            ),
+          );
+        }
     );
   }
 
   _showMaterialSearch(BuildContext context) {
     Navigator.of(context)
-      .push(_buildMaterialSearchPage(context))
-      .then((dynamic value) {
-        if (value != null) {
-          _formFieldKey.currentState.didChange(value);
-          widget.onSelect(value);
-        }
-      });
+        .push(_buildMaterialSearchPage(context))
+        .then((dynamic value) {
+      if (value != null) {
+        _formFieldKey.currentState.didChange(value);
+        widget.onSelect(value);
+      }
+    });
   }
 
   bool get autovalidate {
@@ -311,10 +315,10 @@ class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> {
               errorText: field.errorText,
             ),
             child: _isEmpty(field) ? null : new Text(
-              widget.formatter != null
-                ? widget.formatter(field.value)
-                : field.value.toString(),
-              style: valueStyle
+                widget.formatter != null
+                    ? widget.formatter(field.value)
+                    : field.value.toString(),
+                style: valueStyle
             ),
           );
         },
