@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 .contains(new RegExp(r'' + criteria.toLowerCase().trim() + ''));
             },
             onSelect: (dynamic value) => Navigator.of(context).pop(value),
-            onSubmit: (dynamic value) => Navigator.of(context).pop(value),
+            onSubmit: (String value) => Navigator.of(context).pop(value),
           ),
         );
       }
@@ -119,9 +119,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           .contains(new RegExp(r'' + criteria.toLowerCase().trim() + ''));
                       },
                       onSelect: (dynamic v) {
-                        print(v);
-                      },
-                      onSubmit: (dynamic v) {
                         print(v);
                       },
                       validator: (dynamic value) => value == null ? 'Required field' : null,
