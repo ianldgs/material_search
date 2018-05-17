@@ -1,3 +1,7 @@
+## [0.2.6] - 17/05/2018
+
+* refactor(MaterialSearch): Allow Overriding leading widget for Appbar [#19](https://github.com/ianldgs/material_search/issues/19)
+
 ## [0.2.5] - 11/05/2018
 
 * feat(MaterialSearch.onSubmit) [#17](https://github.com/ianldgs/material_search/issues/17)
