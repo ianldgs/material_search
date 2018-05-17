@@ -48,6 +48,7 @@ class MaterialSearch<T> extends StatefulWidget {
     this.onSubmit,
     this.barBackgroundColor = Colors.white,
     this.iconColor = Colors.black,
+    this.leading,
   }) : assert(() {
          if (results == null && getResults == null
              || results != null && getResults != null) {
@@ -69,6 +70,7 @@ class MaterialSearch<T> extends StatefulWidget {
   final OnSubmit onSubmit;
   final Color barBackgroundColor;
   final Color iconColor;
+  final Widget leading;
 
   @override
   _MaterialSearchState<T> createState() => new _MaterialSearchState<T>();
@@ -174,6 +176,7 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
 
     return new Scaffold(
       appBar: new AppBar(
+        leading: widget.leading != null ? widget.leading : null,
         backgroundColor: widget.barBackgroundColor,
         iconTheme: iconTheme,
         title: new TextField(
