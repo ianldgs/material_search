@@ -1,3 +1,7 @@
+## [0.2.7] - 17/05/2018
+
+* chore(): Update .gitignore to new `dart_tool` pub cache [#23](https://github.com/ianldgs/material_search/issues/23)
+
 ## [0.2.6] - 17/05/2018
 
 * refactor(MaterialSearch): Allow Overriding leading widget for Appbar [#19](https://github.com/ianldgs/material_search/issues/19)
