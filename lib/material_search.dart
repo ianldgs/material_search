@@ -49,7 +49,7 @@ class MaterialSearch<T> extends StatefulWidget {
     this.barBackgroundColor = Colors.white,
     this.iconColor = Colors.black,
     this.leading,
-    this.brightness = Brightness.light,
+    this.appbarBrightness = Brightness.light,
   }) : assert(() {
          if (results == null && getResults == null
              || results != null && getResults != null) {
@@ -72,7 +72,7 @@ class MaterialSearch<T> extends StatefulWidget {
   final Color barBackgroundColor;
   final Color iconColor;
   final Widget leading;
-  final Brightness brightness;
+  final Brightness appbarBrightness;
 
   @override
   _MaterialSearchState<T> createState() => new _MaterialSearchState<T>();
@@ -180,7 +180,7 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
       appBar: new AppBar(
         leading: widget.leading,
         iconTheme: iconTheme,
-        brightness: brightness,
+        brightness: appbarBrightness,
         title: new TextField(
           controller: _controller,
           autofocus: true,
