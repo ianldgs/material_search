@@ -28,7 +28,7 @@ class MaterialSearchResult<T> extends StatelessWidget {
     return new Container(
       child: new Row(
         children: <Widget>[
-          new Container(width: 70.0, child: icon != null ? new Icon(icon) : leftWidget),
+          new Container(width: 70.0, child: icon != null ? new Icon(icon) : new Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[leftWidget],)),
           new Expanded(child: new Text(text, style: Theme.of(context).textTheme.subhead)),
         ],
       ),
