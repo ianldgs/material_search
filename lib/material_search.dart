@@ -177,8 +177,8 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
     return new Scaffold(
       appBar: new AppBar(
         leading: widget.leading,
-        backgroundColor: widget.barBackgroundColor,
         iconTheme: iconTheme,
+        brightness: Brightness.dark,
         title: new TextField(
           controller: _controller,
           autofocus: true,
