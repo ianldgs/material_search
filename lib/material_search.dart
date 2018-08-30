@@ -15,18 +15,20 @@ class MaterialSearchResult<T> extends StatelessWidget {
     this.value,
     this.text,
     this.icon,
+    this.leftWidget,
   }) : super(key: key);
 
   final T value;
   final String text;
   final IconData icon;
+  final Widget leftWidget;
 
   @override
   Widget build(BuildContext context) {
     return new Container(
       child: new Row(
         children: <Widget>[
-          new Container(width: 70.0, child: new Icon(icon)),
+          new Container(width: 70.0, child: icon != null ? new Icon(icon) : new Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[leftWidget],)),
           new Expanded(child: new Text(text, style: Theme.of(context).textTheme.subhead)),
         ],
       ),
@@ -49,6 +51,7 @@ class MaterialSearch<T> extends StatefulWidget {
     this.barBackgroundColor = Colors.white,
     this.iconColor = Colors.black,
     this.leading,
+    this.brightness = Brightness.light,
   }) : assert(() {
          if (results == null && getResults == null
              || results != null && getResults != null) {
@@ -71,6 +74,7 @@ class MaterialSearch<T> extends StatefulWidget {
   final Color barBackgroundColor;
   final Color iconColor;
   final Widget leading;
+  final Brightness brightness;
 
   @override
   _MaterialSearchState<T> createState() => new _MaterialSearchState<T>();
@@ -177,8 +181,8 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
     return new Scaffold(
       appBar: new AppBar(
         leading: widget.leading,
-        backgroundColor: widget.barBackgroundColor,
         iconTheme: iconTheme,
+        brightness: widget.brightness,
         title: new TextField(
           controller: _controller,
           autofocus: true,
