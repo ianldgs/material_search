@@ -5,10 +5,10 @@ author: Ian Luca de Godoy Serpa <ian.naph@gmail.com>
 homepage: https://github.com/ianldgs/material_search
 
 environment:
-  sdk: '>=1.8.0 <2.0.0'
+  sdk: '>=1.8.0 <=2.1.0'
 
 dependencies:
-  mockito: "^2.2.2"
+  mockito: "^3.0.0"
   meta: "^1.1.1"
   flutter:
     sdk: flutter
