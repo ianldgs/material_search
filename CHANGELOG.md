@@ -1,3 +1,7 @@
+## [0.2.8] - 03/09/2018
+
+* chore(): Update mockito and dart, closes [#30](https://github.com/ianldgs/material_search/issues/30)
+
 ## [0.2.7] - 17/05/2018
 
 * chore(): Update .gitignore to new `dart_tool` pub cache [#23](https://github.com/ianldgs/material_search/issues/23)
