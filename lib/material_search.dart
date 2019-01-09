@@ -49,6 +49,8 @@ class MaterialSearch<T> extends StatefulWidget {
     this.barBackgroundColor = Colors.white,
     this.iconColor = Colors.black,
     this.leading,
+    this.elevation = 4.0,
+    this.textInputAction = TextInputAction.done,
   }) : assert(() {
          if (results == null && getResults == null
              || results != null && getResults != null) {
@@ -71,6 +73,8 @@ class MaterialSearch<T> extends StatefulWidget {
   final Color barBackgroundColor;
   final Color iconColor;
   final Widget leading;
+  final double elevation;
+  final TextInputAction textInputAction;
 
   @override
   _MaterialSearchState<T> createState() => new _MaterialSearchState<T>();
@@ -179,11 +183,13 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
         leading: widget.leading,
         backgroundColor: widget.barBackgroundColor,
         iconTheme: iconTheme,
+        elevation: widget.elevation,
         title: new TextField(
           controller: _controller,
           autofocus: true,
           decoration: new InputDecoration.collapsed(hintText: widget.placeholder),
           style: Theme.of(context).textTheme.title,
+          textInputAction: widget.textInputAction,
           onSubmitted: (String value) {
             if (widget.onSubmit != null) {
               widget.onSubmit(value);
