@@ -39,6 +39,7 @@ class MaterialSearch<T> extends StatefulWidget {
   MaterialSearch({
     Key key,
     this.placeholder,
+    this.placeholderColor = Colors.black87,
     this.results,
     this.getResults,
     this.filter,
@@ -47,6 +48,7 @@ class MaterialSearch<T> extends StatefulWidget {
     this.onSelect,
     this.onSubmit,
     this.barBackgroundColor = Colors.white,
+    this.barTitleColor = Colors.black,
     this.iconColor = Colors.black,
     this.leading,
   }) : assert(() {
@@ -69,6 +71,8 @@ class MaterialSearch<T> extends StatefulWidget {
   final ValueChanged<T> onSelect;
   final OnSubmit onSubmit;
   final Color barBackgroundColor;
+  final Color barTitleColor;
+  final Color placeholderColor;
   final Color iconColor;
   final Widget leading;
 
@@ -182,8 +186,12 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
         title: new TextField(
           controller: _controller,
           autofocus: true,
-          decoration: new InputDecoration.collapsed(hintText: widget.placeholder),
-          style: Theme.of(context).textTheme.title,
+          decoration: new InputDecoration.collapsed(
+              hintText: widget.placeholder, hintStyle: TextStyle(color: widget.placeholderColor)),
+          style: TextStyle(
+              fontFamily: Theme.of(context).textTheme.title.fontFamily,
+              fontSize: Theme.of(context).textTheme.title.fontSize,
+              color: widget.barTitleColor),
           onSubmitted: (String value) {
             if (widget.onSubmit != null) {
               widget.onSubmit(value);
