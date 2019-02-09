@@ -49,6 +49,8 @@ class MaterialSearch<T> extends StatefulWidget {
     this.barBackgroundColor = Colors.white,
     this.iconColor = Colors.black,
     this.leading,
+    this.autofocus = true,
+    this.focusNode,
   }) : assert(() {
          if (results == null && getResults == null
              || results != null && getResults != null) {
@@ -71,6 +73,8 @@ class MaterialSearch<T> extends StatefulWidget {
   final Color barBackgroundColor;
   final Color iconColor;
   final Widget leading;
+  final bool autofocus;
+  final FocusNode focusNode;
 
   @override
   _MaterialSearchState<T> createState() => new _MaterialSearchState<T>();
@@ -181,7 +185,8 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
         iconTheme: iconTheme,
         title: new TextField(
           controller: _controller,
-          autofocus: true,
+          autofocus: widget.autofocus,
+          focusNode: widget.focusNode,
           decoration: new InputDecoration.collapsed(hintText: widget.placeholder),
           style: Theme.of(context).textTheme.title,
           onSubmitted: (String value) {
