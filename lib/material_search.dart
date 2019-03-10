@@ -27,7 +27,9 @@ class MaterialSearchResult<T> extends StatelessWidget {
       child: new Row(
         children: <Widget>[
           new Container(width: 70.0, child: new Icon(icon)),
-          new Expanded(child: new Text(text, style: Theme.of(context).textTheme.subhead)),
+          new Expanded(
+              child:
+                  new Text(text, style: Theme.of(context).textTheme.subhead)),
         ],
       ),
       height: 56.0,
@@ -49,15 +51,16 @@ class MaterialSearch<T> extends StatefulWidget {
     this.barBackgroundColor = Colors.white,
     this.iconColor = Colors.black,
     this.leading,
-  }) : assert(() {
-         if (results == null && getResults == null
-             || results != null && getResults != null) {
-           throw new AssertionError('Either provide a function to get the results, or the results.');
-         }
+  })  : assert(() {
+          if (results == null && getResults == null ||
+              results != null && getResults != null) {
+            throw new AssertionError(
+                'Either provide a function to get the results, or the results.');
+          }
 
-         return true;
-       }()),
-       super(key: key);
+          return true;
+        }()),
+        super(key: key);
 
   final String placeholder;
 
@@ -84,8 +87,11 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
   TextEditingController _controller = new TextEditingController();
 
   _filter(dynamic v, String c) {
-    return v.toString().toLowerCase().trim()
-      .contains(new RegExp(r'' + c.toLowerCase().trim() + ''));
+    return v
+        .toString()
+        .toLowerCase()
+        .trim()
+        .contains(new RegExp(r'' + c.toLowerCase().trim() + ''));
   }
 
   @override
@@ -149,75 +155,72 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
 
   @override
   Widget build(BuildContext context) {
-    var results = (widget.results ?? _results)
-      .where((MaterialSearchResult result) {
-        if (widget.filter != null) {
-          return widget.filter(result.value, _criteria);
-        }
-        //only apply default filter if used the `results` option
-        //because getResults may already have applied some filter if `filter` option was omited.
-        else if (widget.results != null) {
-          return _filter(result.value, _criteria);
-        }
+    var results =
+        (widget.results ?? _results).where((MaterialSearchResult result) {
+      if (widget.filter != null) {
+        return widget.filter(result.value, _criteria);
+      }
+      //only apply default filter if used the `results` option
+      //because getResults may already have applied some filter if `filter` option was omited.
+      else if (widget.results != null) {
+        return _filter(result.value, _criteria);
+      }
 
-        return true;
-      })
-      .toList();
+      return true;
+    }).toList();
 
     if (widget.sort != null) {
       results.sort((a, b) => widget.sort(a.value, b.value, _criteria));
     }
 
-    results = results
-      .take(widget.limit)
-      .toList();
+    results = results.take(widget.limit).toList();
 
-    IconThemeData iconTheme = Theme.of(context).iconTheme.copyWith(color: widget.iconColor);
+    IconThemeData iconTheme =
+        Theme.of(context).iconTheme.copyWith(color: widget.iconColor);
 
     return new Scaffold(
       appBar: new AppBar(
         leading: widget.leading,
-        backgroundColor: widget.barBackgroundColor,
         iconTheme: iconTheme,
         title: new TextField(
           controller: _controller,
           autofocus: true,
-          decoration: new InputDecoration.collapsed(hintText: widget.placeholder),
-          style: Theme.of(context).textTheme.title,
+          decoration:
+              new InputDecoration.collapsed(hintText: widget.placeholder),
           onSubmitted: (String value) {
             if (widget.onSubmit != null) {
               widget.onSubmit(value);
             }
           },
         ),
-        actions: _criteria.length == 0 ? [] : [
-          new IconButton(
-            icon: new Icon(Icons.clear),
-            onPressed: () {
-              setState(() {
-                _controller.text = _criteria = '';
-              });
-            }
-          ),
-        ],
+        actions: _criteria.length == 0
+            ? []
+            : [
+                new IconButton(
+                    icon: new Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() {
+                        _controller.text = _criteria = '';
+                      });
+                    }),
+              ],
       ),
       body: _loading
-        ? new Center(
-            child: new Padding(
-              padding: const EdgeInsets.only(top: 50.0),
-              child: new CircularProgressIndicator()
+          ? new Center(
+              child: new Padding(
+                  padding: const EdgeInsets.only(top: 50.0),
+                  child: new CircularProgressIndicator()),
+            )
+          : new SingleChildScrollView(
+              child: new Column(
+                children: results.map((MaterialSearchResult result) {
+                  return new InkWell(
+                    onTap: () => widget.onSelect(result.value),
+                    child: result,
+                  );
+                }).toList(),
+              ),
             ),
-          )
-        : new SingleChildScrollView(
-            child: new Column(
-              children: results.map((MaterialSearchResult result) {
-                return new InkWell(
-                  onTap: () => widget.onSelect(result.value),
-                  child: result,
-                );
-              }).toList(),
-            ),
-          ),
     );
   }
 }
@@ -228,8 +231,12 @@ class _MaterialSearchPageRoute<T> extends MaterialPageRoute<T> {
     RouteSettings settings: const RouteSettings(),
     maintainState: true,
     bool fullscreenDialog: false,
-  }) : assert(builder != null),
-        super(builder: builder, settings: settings, maintainState: maintainState, fullscreenDialog: fullscreenDialog);
+  })  : assert(builder != null),
+        super(
+            builder: builder,
+            settings: settings,
+            maintainState: maintainState,
+            fullscreenDialog: fullscreenDialog);
 }
 
 class MaterialSearchInput<T> extends StatefulWidget {
@@ -260,46 +267,49 @@ class MaterialSearchInput<T> extends StatefulWidget {
   final ValueChanged<T> onSelect;
 
   @override
-  _MaterialSearchInputState<T> createState() => new _MaterialSearchInputState<T>();
+  _MaterialSearchInputState<T> createState() =>
+      new _MaterialSearchInputState<T>();
 }
 
 class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> {
-  GlobalKey<FormFieldState<T>> _formFieldKey = new GlobalKey<FormFieldState<T>>();
+  GlobalKey<FormFieldState<T>> _formFieldKey =
+      new GlobalKey<FormFieldState<T>>();
 
   _buildMaterialSearchPage(BuildContext context) {
     return new _MaterialSearchPageRoute<T>(
-      settings: new RouteSettings(
-        name: 'material_search',
-        isInitialRoute: false,
-      ),
-      builder: (BuildContext context) {
-        return new Material(
-          child: new MaterialSearch<T>(
-            placeholder: widget.placeholder,
-            results: widget.results,
-            getResults: widget.getResults,
-            filter: widget.filter,
-            sort: widget.sort,
-            onSelect: (dynamic value) => Navigator.of(context).pop(value),
-          ),
-        );
-      }
-    );
+        settings: new RouteSettings(
+          name: 'material_search',
+          isInitialRoute: false,
+        ),
+        builder: (BuildContext context) {
+          return new Material(
+            child: new MaterialSearch<T>(
+              placeholder: widget.placeholder,
+              results: widget.results,
+              getResults: widget.getResults,
+              filter: widget.filter,
+              sort: widget.sort,
+              onSelect: (dynamic value) => Navigator.of(context).pop(value),
+            ),
+          );
+        });
   }
 
   _showMaterialSearch(BuildContext context) {
     Navigator.of(context)
-      .push(_buildMaterialSearchPage(context))
-      .then((dynamic value) {
-        if (value != null) {
-          _formFieldKey.currentState.didChange(value);
-          widget.onSelect(value);
-        }
-      });
+        .push(_buildMaterialSearchPage(context))
+        .then((dynamic value) {
+      if (value != null) {
+        _formFieldKey.currentState.didChange(value);
+        widget.onSelect(value);
+      }
+    });
   }
 
   bool get autovalidate {
-    return widget.autovalidate ?? Form.of(context)?.widget?.autovalidate ?? false;
+    return widget.autovalidate ??
+        Form.of(context)?.widget?.autovalidate ??
+        false;
   }
 
   bool _isEmpty(field) {
@@ -325,12 +335,13 @@ class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> {
               labelText: widget.placeholder,
               errorText: field.errorText,
             ),
-            child: _isEmpty(field) ? null : new Text(
-              widget.formatter != null
-                ? widget.formatter(field.value)
-                : field.value.toString(),
-              style: valueStyle
-            ),
+            child: _isEmpty(field)
+                ? null
+                : new Text(
+                    widget.formatter != null
+                        ? widget.formatter(field.value)
+                        : field.value.toString(),
+                    style: valueStyle),
           );
         },
       ),
