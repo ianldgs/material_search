@@ -15,23 +15,37 @@ class MaterialSearchResult<T> extends StatelessWidget {
     this.value,
     this.text,
     this.icon,
+    this.hasIcon = true,
   }) : super(key: key);
 
   final T value;
   final String text;
   final IconData icon;
+  final bool hasIcon;
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      child: new Row(
-        children: <Widget>[
-          new Container(width: 70.0, child: new Icon(icon)),
-          new Expanded(child: new Text(text, style: Theme.of(context).textTheme.subhead)),
-        ],
-      ),
-      height: 56.0,
-    );
+    if (hasIcon) {
+      return new Container(
+        child: new Row(
+          children: <Widget>[
+            new Container(width: 70.0, child: new Icon(icon)),
+            new Expanded(child: new Text(text, style: Theme.of(context).textTheme.subhead)),
+          ],
+        ),
+        height: 56.0,
+      );
+    } else {
+      return new Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.0),
+        child: new Row(
+          children: <Widget>[
+            new Expanded(child: new Text(text, style: Theme.of(context).textTheme.subhead)),
+          ],
+        ),
+        height: 56.0,
+      );
+    }
   }
 }
 
