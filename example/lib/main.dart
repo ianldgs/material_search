@@ -47,7 +47,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return new MaterialPageRoute<String>(
       settings: new RouteSettings(
         name: 'material_search',
-        isInitialRoute: false,
       ),
       builder: (BuildContext context) {
         return new Material(
