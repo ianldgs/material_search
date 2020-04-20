@@ -225,7 +225,7 @@ class _MaterialSearchState<T> extends State<MaterialSearch> {
 class _MaterialSearchPageRoute<T> extends MaterialPageRoute<T> {
   _MaterialSearchPageRoute({
     @required WidgetBuilder builder,
-    RouteSettings settings: const RouteSettings(),
+    RouteSettings settings: const RouteSettings(name: 'material_search'),
     maintainState: true,
     bool fullscreenDialog: false,
   }) : assert(builder != null),
@@ -270,7 +270,6 @@ class _MaterialSearchInputState<T> extends State<MaterialSearchInput<T>> {
     return new _MaterialSearchPageRoute<T>(
       settings: new RouteSettings(
         name: 'material_search',
-        isInitialRoute: false,
       ),
       builder: (BuildContext context) {
         return new Material(
